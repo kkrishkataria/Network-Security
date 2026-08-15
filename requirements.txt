@@ -4,5 +4,5 @@ numpy
 pymongo[srv]==3.11
 certifi
 dotenv
-
+scikit-learn
 # -e .
