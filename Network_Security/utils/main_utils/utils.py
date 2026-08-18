@@ -31,6 +31,15 @@ def save_numpy_arr_data(filepath:str,arr:np.array): # location of npy file
             np.save(file,arr) # to store in npy file 
     except Exception as e:
         raise NetworkSecurityException(e,sys)
+    
+def load_numpy_arr_data(filepath:str): 
+    try:
+        if not os.path.exists(filepath):
+            raise Exception(f"The file {filepath} not Exists")
+        with open(filepath,'wb') as file:
+            return np.load(file) 
+    except Exception as e:
+        raise NetworkSecurityException(e,sys)
 
 def save_object(filepath:str,obj:object):
     try:
@@ -40,3 +49,13 @@ def save_object(filepath:str,obj:object):
             pickle.dump(obj,file)
     except Exception as e:
         raise NetworkSecurityException(e,sys)
+ 
+def load_object(filepath:str):
+    try:
+        if not os.path.exists(filepath):
+            raise Exception(f"The file {filepath} not Exists")
+        with open(filepath,'rb') as file:
+            return pickle.load(file)
+    except Exception as e:
+        raise NetworkSecurityException(e,sys)
+
