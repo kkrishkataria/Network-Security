@@ -1,5 +1,6 @@
 import os,sys
 import numpy as np
+import mlflow
 from Network_Security.entity.config_entity import ModelTrainerConfig
 from Network_Security.entity.artifact_entity import DataTransformationArtifact,ModelTrainerArtifact,ClassificationMetricArtifact
 from Network_Security.logging.logger import logging
@@ -27,7 +28,20 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e,sys)
 
+    def track_mlflow(self,best_model,classification_metric:ClassificationMetricArtifact):
+        with mlflow.start_run():
+            f1_score=classification_metric.f1_score
+            precision_score=classification_metric.precision_score
+            recall_score=classification_metric.recall_score
+            mlflow.log_metric("f1 score",f1_score)
+            mlflow.log_metric("precision_score",precision_score)
+            mlflow.log_metric("recall_score",recall_score)
+            mlflow.sklearn.log_model(best_model,"Model")
+
+    
+
     def train_model(self,x_train,y_train,x_test,y_test):
+
         models = {
         "Random Forest": RandomForestClassifier(verbose=1),
         "Decision Tree": DecisionTreeClassifier(),
@@ -69,6 +83,8 @@ class ModelTrainer:
         classification_train_metric:ClassificationMetricArtifact=get_classification_score(y_train,y_pred_train)
         classification_test_metric:ClassificationMetricArtifact=get_classification_score(y_test,y_pred_test)
 
+        self.track_mlflow(best_model,classification_train_metric)
+        self.track_mlflow(best_model,classification_test_metric)
         preprocessor=load_object(self.data_transformation_artifact.transformed_object_file_path)
         dir_path=os.path.dirname(self.model_trainer_config.trained_model_file_path)
         os.makedirs(dir_path,exist_ok=True)
@@ -76,8 +92,6 @@ class ModelTrainer:
         save_object(self.model_trainer_config.trained_model_file_path,network_model)
         model_trainer_artifact=ModelTrainerArtifact(self.model_trainer_config.trained_model_file_path,classification_train_metric,classification_test_metric)
         return model_trainer_artifact
-
-
 
     def initiate_model_trainer(self)->ModelTrainerArtifact :
         try:
