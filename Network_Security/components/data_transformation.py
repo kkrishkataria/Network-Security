@@ -56,6 +56,7 @@ class DataTransformation:
             input_test_tranform_data=preprocessor.transform(input_test_df)
             train_arr=np.c_[input_train_tranform_data,np.array(target_train_df)]
             test_arr=np.c_[input_test_tranform_data,np.array(target_test_df)]
+            save_object("final_model/preprocessor.pkl",preprocessor) 
             save_numpy_arr_data(self.data_transformation_config.transformed_train_file_path,train_arr)
             save_numpy_arr_data(self.data_transformation_config.transformed_test_file_path,test_arr)
 

@@ -20,6 +20,10 @@ from sklearn.ensemble import (
     RandomForestClassifier
 )
 
+import dagshub
+dagshub.init(repo_owner='kkrishkataria', repo_name='Network-Security', mlflow=True)
+
+
 class ModelTrainer:
     def __init__(self,model_trainer_config:ModelTrainerConfig,data_transformation_artifact:DataTransformationArtifact):
         try:
@@ -83,13 +87,13 @@ class ModelTrainer:
         classification_train_metric:ClassificationMetricArtifact=get_classification_score(y_train,y_pred_train)
         classification_test_metric:ClassificationMetricArtifact=get_classification_score(y_test,y_pred_test)
 
-        self.track_mlflow(best_model,classification_train_metric)
         self.track_mlflow(best_model,classification_test_metric)
         preprocessor=load_object(self.data_transformation_artifact.transformed_object_file_path)
         dir_path=os.path.dirname(self.model_trainer_config.trained_model_file_path)
         os.makedirs(dir_path,exist_ok=True)
         network_model=NetworkModel(preprocessor,best_model)
         save_object(self.model_trainer_config.trained_model_file_path,network_model)
+        save_object("final_model/model.pkl",best_model)
         model_trainer_artifact=ModelTrainerArtifact(self.model_trainer_config.trained_model_file_path,classification_train_metric,classification_test_metric)
         return model_trainer_artifact
 
